@@ -1,6 +1,8 @@
 package com.ericdebouwer.zombieapocalypse.zombie;
 
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Zombie;
+import org.bukkit.entity.Phantom;
 import javax.annotation.Nullable;
 
 public enum ZombieType {
@@ -23,24 +25,26 @@ public enum ZombieType {
 	 * @return the type of a zombie, or null
 	 */
 
-	public static @Nullable ZombieType getType(Zombie zombie){
-		for (String tag: zombie.getScoreboardTags()){
-			if (tag.startsWith(ZOMBIE_IDENTIFIER)){
-				try {
-					String type = tag.replaceFirst(ZOMBIE_IDENTIFIER, "");
-					return ZombieType.valueOf(type);
-				}catch (IllegalArgumentException e){
-					return ZombieType.DEFAULT;
-				}
-			}
-		}
-		return null;
-	}
+	public static @Nullable ZombieType getType(Mob mob){
+        if(!(mob instanceof Zombie || mob instanceof Phantom)) return null;
+        
+        for (String tag: mob.getScoreboardTags()){
+            if (tag.startsWith(ZOMBIE_IDENTIFIER)){
+                try {
+                    String type = tag.replaceFirst(ZOMBIE_IDENTIFIER, "");
+                    return ZombieType.valueOf(type);
+                }catch (IllegalArgumentException e){
+                    return ZombieType.DEFAULT;
+                }
+            }
+        }
+        return null;
+    }
 
-	public Zombie set(Zombie zombie){
+	public Mob set(Mob mob){
 		String type = ZOMBIE_IDENTIFIER + this.toString();
-		zombie.getScoreboardTags().add(type);
-		return zombie;
+		mob.getScoreboardTags().add(type);
+		return mob;
 	}
 }
 

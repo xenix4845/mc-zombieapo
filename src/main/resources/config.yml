@@ -82,8 +82,9 @@ zombies:
       enabled: true
       name: ""
       head: ""
-   PHANTOM:
+   BANSHEE:
       enabled: true
+      spawn_weight: 20  # 20% 확률로 스폰 (1-100 사이 값)
       attributes:
          GENERIC_MAX_HEALTH: 30.0
          GENERIC_MOVEMENT_SPEED: 0.4

@@ -4,7 +4,7 @@ import com.ericdebouwer.zombieapocalypse.ZombieApocalypse;
 import com.ericdebouwer.zombieapocalypse.zombie.ZombieType;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.Mob;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
@@ -133,23 +133,23 @@ public class ApocalypseAPI {
     }
 
     /**
-     * Spawn a custom zombie.
+     * Spawn a custom zombie or phantom.
      *
-     * @param location where to spawn the zombie.
-     * @param type the type of zombie to spawn.
-     * @return an instance of {@link org.bukkit.entity.Zombie}, which can be modified.
+     * @param location where to spawn the mob.
+     * @param type the type of mob to spawn.
+     * @return an instance of {@link org.bukkit.entity.Mob}, which can be modified.
      */
-    public @Nonnull Zombie spawnZombie(@Nonnull Location location, @Nonnull ZombieType type){
+    public @Nonnull Mob spawnZombie(@Nonnull Location location, @Nonnull ZombieType type){
         return plugin.getZombieFactory().spawnZombie(location, type, ZombieSpawnedEvent.SpawnReason.API);
     }
 
     /**
-     * Spawn a <b>random</b> custom zombie that <b>is enabled</b>.
+     * Spawn a <b>random</b> custom zombie or phantom that <b>is enabled</b>.
      *
-     * @param location where to spawn the zombie.
-     * @return an instance of {@link org.bukkit.entity.Zombie}, which can be modified.
+     * @param location where to spawn the mob.
+     * @return an instance of {@link org.bukkit.entity.Mob}, which can be modified.
      */
-    public @Nonnull Zombie spawnZombie(@Nonnull Location location){
+    public @Nonnull Mob spawnZombie(@Nonnull Location location){
         return plugin.getZombieFactory().spawnZombie(location, ZombieSpawnedEvent.SpawnReason.API);
     }
 
