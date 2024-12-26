@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.potion.PotionEffect;
@@ -139,6 +140,15 @@ public class ZombieFactory {
     private Mob spawnForEnvironment(Location loc, ZombieType type, ZombieSpawnedEvent.SpawnReason reason) {
         if (type == ZombieType.BANSHEE) {
             try {
+                // 하늘이 보이는지 체크 (y좌표부터 위로 블록이 없는지 확인)
+                Location checkLoc = loc.clone();
+                while (checkLoc.getBlockY() <= checkLoc.getWorld().getMaxHeight()) {
+                    if (!checkLoc.getBlock().isEmpty() && !checkLoc.getBlock().isPassable()) {
+                        return null; // 블록이 있으면 스폰하지 않음
+                    }
+                    checkLoc.add(0, 1, 0);
+                }
+                
                 Location spawnLoc = loc.clone().add(0, 10, 0);
                 Phantom phantom;
                 
@@ -173,6 +183,37 @@ public class ZombieFactory {
                 return phantom;
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to spawn Phantom: " + e.getMessage());
+                return null;
+            }
+        }
+
+        if (type == ZombieType.EXPLOSIVE_VINDICATOR) {
+            // 지상 체크
+            Location spawnLoc = loc.clone();
+            Location groundLoc = loc.clone().add(0, -1, 0);
+
+            if (!spawnLoc.getBlock().isEmpty() || !groundLoc.getBlock().getType().isSolid()) {
+                return null;
+            }
+
+            try {
+                Vindicator vindicator = (plugin.isPaperMC())
+                    ? loc.getWorld().spawn(loc, Vindicator.class, CreatureSpawnEvent.SpawnReason.NATURAL)
+                    : loc.getWorld().spawn(loc, Vindicator.class);
+
+                type.set(vindicator);
+                vindicator.setCanJoinRaid(false);
+                vindicator.setPersistent(true);
+
+                // 기본 속성 설정
+                Objects.requireNonNull(vindicator.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED))
+                    .setBaseValue(0.4); // 속도 증가
+                Objects.requireNonNull(vindicator.getAttribute(Attribute.GENERIC_FOLLOW_RANGE))
+                    .setBaseValue(40.0); // 추적 거리 증가
+
+                return vindicator;
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to spawn Explosive Vindicator: " + e.getMessage());
                 return null;
             }
         }

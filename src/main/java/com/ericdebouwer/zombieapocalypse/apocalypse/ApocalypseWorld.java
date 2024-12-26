@@ -40,6 +40,27 @@ public class ApocalypseWorld implements Apocalypse {
 		loadBossBar(1.0);
 	}
 
+	public String getWorldName() {
+        return worldName;
+    }
+    
+    public int getMobCap() {
+        return mobCap;
+    }
+    
+    public void setMobCap(int mobCap) {
+        this.mobCap = mobCap;
+    }
+    
+    public KeyedBossBar getBossBar() {
+        return bossBar;
+    }
+    
+    @Override
+    public long getEndEpochSecond() {
+        return endEpochSecond;
+    }
+
 	public void reloadBossBar(){
 		List<Player> players = this.bossBar.getPlayers();
 		double progress = bossBar.getProgress();
@@ -93,7 +114,4 @@ public class ApocalypseWorld implements Apocalypse {
 		if (barCountDown != null) barCountDown.cancel();
 		barCountDown = null;
 	}
-
-
-
 }

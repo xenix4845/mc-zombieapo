@@ -93,4 +93,24 @@ public class ZombieApocalypse extends JavaPlugin {
 		if (apocalypseManager != null)
 			apocalypseManager.onDisable();
 	}
+
+	public ConfigurationManager getConfigManager() {
+        return configManager;
+    }
+    
+    public ApocalypseManager getApocalypseManager() {
+        return apocalypseManager;
+    }
+    
+    public ZombieFactory getZombieFactory() {
+        return zombieFactory;
+    }
+    
+    public ZombieItems getZombieItems() {
+        return zombieItems;
+    }
+    
+    public boolean isPaperMC() {
+        return paperMC;
+    }
 }

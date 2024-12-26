@@ -91,6 +91,14 @@ zombies:
          GENERIC_ATTACK_DAMAGE: 4.0
          GENERIC_FLYING_SPEED: 1.2
       name: "Banshee Phantom"
+   EXPLOSIVE_VINDICATOR:
+      enabled: true
+      spawn_weight: 15  # 15% 확률로 스폰 (1-100 사이 값)
+      name: "§EEXPLOSIVE VINDICATOR"
+      attributes:
+         GENERIC_MAX_HEALTH: 20.0
+         GENERIC_MOVEMENT_SPEED: 0.3
+         GENERIC_FOLLOW_RANGE: 30.0  # 감지 범위
     
 # whether some zombies can spawn as babies, like zombies normally do
 allow-babies: true

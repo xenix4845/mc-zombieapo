@@ -20,10 +20,17 @@ import org.bukkit.util.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.attribute.Attribute;
+import java.util.Map;
+import java.util.UUID;
+import java.util.HashMap;
+
 @RequiredArgsConstructor
 public class ZombieListener implements Listener {
 
     private final ZombieApocalypse plugin;
+    private final Map<UUID, BukkitTask> vindicatorTasks = new HashMap<>();
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onMobSpawn(CreatureSpawnEvent event){
@@ -60,6 +67,89 @@ public class ZombieListener implements Listener {
         else if (type == ZombieType.MULTIPLIER){
             spawnMultiplierZombies(zombie.getLocation());
         }
+    }
+
+    @EventHandler
+    public void onVindicatorSpawn(CreatureSpawnEvent event) {
+        if (!(event.getEntity() instanceof Vindicator vindicator)) return;
+        if (ZombieType.getType(vindicator) != ZombieType.EXPLOSIVE_VINDICATOR) return;
+        
+        // 주기적으로 체크하는 task 생성
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (vindicator.isDead() || !vindicator.isValid()) {
+                vindicatorTasks.remove(vindicator.getUniqueId()).cancel();
+                return;
+            }
+            
+            Player target = (Player) vindicator.getTarget();
+            if (target != null && target.isValid() && !target.isDead()) {
+                double distance = vindicator.getLocation().distanceSquared(target.getLocation());
+                if (distance < 6) { // 2.5 블록 이내
+                    Location loc = vindicator.getLocation();
+                    vindicator.remove();
+                    loc.getWorld().createExplosion(
+                        loc,
+                        4f,
+                        false,
+                        plugin.getConfigManager().isBlockDamage(),
+                        vindicator
+                    );
+                    vindicatorTasks.remove(vindicator.getUniqueId()).cancel();
+                }
+            }
+        }, 0L, 2L); // 틱 주기 (0.1초마다 체크)
+        
+        vindicatorTasks.put(vindicator.getUniqueId(), task);
+    }
+
+    @EventHandler
+    public void onVindicatorDeath(EntityDeathEvent event) {
+        if (!(event.getEntity() instanceof Vindicator vindicator)) return;
+        if (ZombieType.getType(vindicator) != ZombieType.EXPLOSIVE_VINDICATOR) return;
+        
+        // 죽을 때 폭발
+        Location loc = vindicator.getLocation();
+        loc.getWorld().createExplosion(
+            loc,
+            4f,
+            false,
+            plugin.getConfigManager().isBlockDamage(),
+            vindicator
+        );
+        
+        // task 정리
+        BukkitTask task = vindicatorTasks.remove(vindicator.getUniqueId());
+        if (task != null) {
+            task.cancel();
+        }
+    }
+
+    @EventHandler
+    public void onVindicatorDamage(EntityDamageByEntityEvent event) {
+
+	    Entity damager = event.getDamager();
+        Entity entity = event.getEntity();
+        
+        Vindicator vindicator = null;
+        if (damager instanceof Vindicator) {
+            vindicator = (Vindicator) damager;
+        } else if (entity instanceof Vindicator && damager instanceof Player) {
+            vindicator = (Vindicator) entity;
+        }
+        
+        if (vindicator == null || ZombieType.getType(vindicator) != ZombieType.EXPLOSIVE_VINDICATOR) return;
+        
+        event.setCancelled(true);
+        Location loc = vindicator.getLocation();
+        vindicator.remove();
+        
+        createDelayedExplosion(loc, 4f, null);
+    }
+
+    // 플러그인 비활성화 시 모든 task 정리
+    public void cleanup() {
+        vindicatorTasks.values().forEach(BukkitTask::cancel);
+        vindicatorTasks.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
