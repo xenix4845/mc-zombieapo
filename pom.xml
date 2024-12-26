@@ -1,55 +1,68 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.ericdebouwer</groupId>
-  <artifactId>ZombieApocalypse</artifactId>
-  <version>1.4.11</version>
-  <repositories>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ericdebouwer</groupId>
+    <artifactId>ZombieApocalypse</artifactId>
+    <version>1.4.11</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
         <repository>
-           <id>papermc</id>
-           <url>https://papermc.io/repo/repository/maven-public/</url>
-		</repository>
-        <repository>
-          <id>SilkSpawners-Repo</id>
-          <url>https://repo.dustplanet.de/artifactory/libs-release-local</url>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
-   </repositories>
-   <dependencies>
-       <dependency>
-           <groupId>io.papermc.paper</groupId>
-           <artifactId>paper-api</artifactId>
-           <version>1.18.2-R0.1-SNAPSHOT</version>
-           <scope>provided</scope>
-       </dependency>
-       <dependency>
-           <groupId>com.mojang</groupId>
-           <artifactId>authlib</artifactId>
-           <version>5.0.48</version>
-           <scope>provided</scope>
-       </dependency>
-       <dependency>
-           <groupId>org.bstats</groupId>
-           <artifactId>bstats-bukkit</artifactId>
-           <version>3.0.1</version>
-           <scope>compile</scope>
-       </dependency>
-       <dependency>
-           <groupId>de.dustplanet</groupId>
-           <artifactId>silkspawners</artifactId>
-           <version>6.2.0</version>
-           <scope>provided</scope>
-           <exclusions>
-               <exclusion>
-                   <groupId>*</groupId>
-                   <artifactId>*</artifactId>
-               </exclusion>
-           </exclusions>
-       </dependency>
-       <dependency>
-           <groupId>org.projectlombok</groupId>
-           <artifactId>lombok</artifactId>
-           <version>1.18.26</version>
-           <scope>provided</scope>
-       </dependency>
+        <repository>
+            <id>SilkSpawners-Repo</id>
+            <url>https://repo.dustplanet.de/artifactory/libs-release-local</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.purpurmc.purpur</groupId>
+            <artifactId>purpur-api</artifactId>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>5.0.48</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.dustplanet</groupId>
+            <artifactId>silkspawners</artifactId>
+            <version>6.2.0</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -62,8 +75,17 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -95,7 +117,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -108,10 +130,4 @@
             </plugin>
         </plugins>
     </build>
-    
-    <properties>
-  		<maven.compiler.source>1.8</maven.compiler.source>
-  		<maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 </project>

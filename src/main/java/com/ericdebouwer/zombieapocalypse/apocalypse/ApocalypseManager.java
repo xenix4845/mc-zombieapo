@@ -82,22 +82,37 @@ public class ApocalypseManager {
 	}
 	
 	public void onDisable(){
-		for (World world: Bukkit.getWorlds()){
-			Optional<ApocalypseWorld> apoWorld = getApoWorld(world.getName());
-			if (!apoWorld.isPresent()) continue;
-
-			for (Player player: world.getPlayers()){
-				apoWorld.get().removePlayer(player);
+		// 비동기적으로 처리 가능한 부분 분리
+		apocalypseWorlds.forEach(apoWorld -> {
+			World world = Bukkit.getWorld(apoWorld.getWorldName());
+			if (world != null) {
+				world.getPlayers().forEach(apoWorld::removePlayer);
 			}
-		}
+		});
+		
+		// 설정 저장은 동기적으로 처리
 		this.saveConfig();
 	}
 	
 	private void addEndDelay(final String worldName, long endTime){
 		long now = java.time.Instant.now().getEpochSecond();
 		long delay = (endTime-now) * 20;
-		BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> endApocalypse(worldName, true), delay);
-		apoEnders.put(worldName, task);
+		
+		// 큰 딜레이는 여러 작은 작업으로 분할
+		if (delay > 6000) { // 5분 이상인 경우
+			BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+				if (!isApocalypse(worldName)) return;
+				long currentTime = java.time.Instant.now().getEpochSecond();
+				if (currentTime >= endTime) {
+					endApocalypse(worldName, true);
+				}
+			}, 6000, 6000); // 5분마다 체크
+			apoEnders.put(worldName, task);
+		} else {
+			BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, 
+				() -> endApocalypse(worldName, true), delay);
+			apoEnders.put(worldName, task);
+		}
 	}
 	
 	public Optional<ApocalypseWorld> getApoWorld(String worldName){

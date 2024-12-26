@@ -37,16 +37,25 @@ public class ZombieListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onMobSpawn(CreatureSpawnEvent event){
-		if (!(plugin.getApocalypseManager().isApocalypse(event.getLocation().getWorld().getName()))) return;
+		// 빠른 early return을 통한 성능 향상
 		if (!(event.getEntity() instanceof Monster)) return;
-		if (plugin.getConfigManager().getIgnoredReasons().contains(event.getSpawnReason())) return;
-
-		if (event.getEntity() instanceof Zombie && ZombieType.getType((Zombie) event.getEntity()) != null) return;
 		if (event.getEntity().hasMetadata("ignoreZombie")) return;
+		
+		String worldName = event.getLocation().getWorld().getName();
+		if (!plugin.getApocalypseManager().isApocalypse(worldName)) return;
+		if (plugin.getConfigManager().getIgnoredReasons().contains(event.getSpawnReason())) return;
+		
+		// 이미 우리의 커스텀 좀비인지 체크
+		if (event.getEntity() instanceof Zombie zombie && ZombieType.getType(zombie) != null) return;
 
 		event.setCancelled(true);
+		
+		// 높이 체크
 		if (event.getLocation().getBlockY() < plugin.getConfigManager().getMinSpawnHeight()) return;
-		plugin.getZombieFactory().spawnApocalypseZombie(event.getLocation());
+		
+		// 스폰 요청을 다음 틱으로 지연
+		Bukkit.getScheduler().runTask(plugin, () -> 
+			plugin.getZombieFactory().spawnApocalypseZombie(event.getLocation()));
 	}
 	
 	@EventHandler
@@ -73,6 +82,40 @@ public class ZombieListener implements Listener {
 						ZombieType.DEFAULT, ZombieSpawnedEvent.SpawnReason.ZOMBIE_EFFECT);
 			}
 		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	private void onPhantomAttack(EntityDamageByEntityEvent event) {
+		if (!(event.getDamager() instanceof Phantom phantom)) return;
+		if (!(event.getEntity() instanceof Player)) return;
+		if (ZombieType.getType(phantom) != ZombieType.PHANTOM) return;
+		
+		// 공격 후 즉시 폭발
+		phantom.remove();
+		phantom.getWorld().createExplosion(
+			phantom.getLocation(), 
+			4f,  // 폭발 강도
+			false,  // 불 생성 여부
+			plugin.getConfigManager().isBlockDamage(),  // 블록 파괴 여부
+			phantom  // 폭발 원인 엔티티
+		);
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	private void onPhantomCollide(EntityDamageByEntityEvent event) {
+		if (!(event.getEntity() instanceof Phantom phantom)) return;
+		if (!(event.getDamager() instanceof Player)) return;
+		if (ZombieType.getType(phantom) != ZombieType.PHANTOM) return;
+		
+		// 충돌 시 폭발
+		phantom.remove();
+		phantom.getWorld().createExplosion(
+			phantom.getLocation(), 
+			4f, 
+			false,
+			plugin.getConfigManager().isBlockDamage(),
+			phantom
+		);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

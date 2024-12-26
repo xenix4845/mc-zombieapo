@@ -77,11 +77,15 @@ public class ApocalypseWorld implements Apocalypse {
 		final double STEPS = 120D;
 		long now = java.time.Instant.now().getEpochSecond();
 		int period = (int) Math.ceil((this.endEpochSecond - now) / STEPS * 20D);
-
+		
+		// 보스바 업데이트 빈도 조절
+		period = Math.max(period, 20); // 최소 1초
+		
 		barCountDown = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-			double progress = bossBar.getProgress() - 1D / STEPS;
-			if (progress >= 0) bossBar.setProgress(progress);
-
+			if (!Bukkit.getWorld(worldName).getPlayers().isEmpty()) {
+				double progress = bossBar.getProgress() - 1D / STEPS;
+				if (progress >= 0) bossBar.setProgress(progress);
+			}
 		}, period, period);
 	}
 

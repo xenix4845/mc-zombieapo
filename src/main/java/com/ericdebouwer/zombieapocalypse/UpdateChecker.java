@@ -44,29 +44,32 @@ public class UpdateChecker {
 		return this;
 	}
 	
-	public void run(){
-		
-		String currentVersion = plugin.getDescription().getVersion();
-		String apiUrl = "https://api.spigotmc.org/legacy/update.php?resource=";
-		
-		Bukkit.getScheduler().runTaskLaterAsynchronously(this.plugin, () -> {
-			
-			if (onStart != null) this.onStart.run();
-			
-            try (InputStream inputStream = new URL(apiUrl + resourceId).openStream(); Scanner scanner = new Scanner(inputStream)) {
-	               	String latestVersion = scanner.next();
-
-            		if (!isUpToDate(currentVersion, latestVersion)) {
-            			onOldVersion.accept(currentVersion, latestVersion);
-            		}
-            		else {
-            			onNoUpdate.run();
-            		}
-            } catch (IOException | NoSuchElementException ex) {
-                onError.run();
+	public void run() {
+        String currentVersion = plugin.getDescription().getVersion();
+        String apiUrl = "https://api.spigotmc.org/legacy/update.php?resource=";
+        
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            if (onStart != null) this.onStart.run();
+            
+            try (InputStream inputStream = new URL(apiUrl + resourceId).openStream();
+                 Scanner scanner = new Scanner(inputStream)) {
+                
+                String latestVersion = scanner.next();
+                
+                // 메인 스레드로 결과 처리 위임
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (!isUpToDate(currentVersion, latestVersion)) {
+                        onOldVersion.accept(currentVersion, latestVersion);
+                    } else {
+                        onNoUpdate.run();
+                    }
+                });
+                
+            } catch (IOException ex) {
+                Bukkit.getScheduler().runTask(plugin, () -> onError.run());
             }
-        }, 3L);
-	}
+        });
+    }
 	
 	private boolean isUpToDate(String currentString, String latestString){
 		try {

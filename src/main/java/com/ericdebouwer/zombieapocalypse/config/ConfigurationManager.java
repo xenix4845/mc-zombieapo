@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.HashMap;
 
 @Getter
 public class ConfigurationManager {
@@ -53,6 +54,9 @@ public class ConfigurationManager {
 	private boolean removeZombiesOnEnd;
 	private boolean allowSleep;
 	private boolean isValid;
+
+	// 캐시 시스템 추가
+    private final Map<String, Object> configCache = new HashMap<>();
 	
 	public ConfigurationManager(ZombieApocalypse plugin){
 		this.plugin = plugin;
@@ -121,10 +125,12 @@ public class ConfigurationManager {
 		}
 	}
 	
-	public String getString(Message m){
-		String msg = plugin.getConfig().getString(MESSAGES_PREFIX + m.getKey());
-		return msg == null ? "" : msg;
-	}
+	public String getString(Message m) {
+        return configCache.computeIfAbsent(MESSAGES_PREFIX + m.getKey(), key -> {
+            String msg = plugin.getConfig().getString(key);
+            return msg == null ? "" : msg;
+        }).toString();
+    }
 	
 	public void sendMessage(CommandSender p, Message message, ImmutableMap<String, String> replacements){
 		String msg = getString(message);
@@ -151,10 +157,10 @@ public class ConfigurationManager {
 		return valid;
 	}
 	
-	public void reloadConfig(){
-		plugin.reloadConfig();
-		this.isValid = this.checkAndUpdateConfig();
-		if (isValid) this.loadConfig();
-	}
-
+	public void reloadConfig() {
+        plugin.reloadConfig();
+        configCache.clear(); // 캐시 초기화
+        this.isValid = this.checkAndUpdateConfig();
+        if (isValid) this.loadConfig();
+    }
 }

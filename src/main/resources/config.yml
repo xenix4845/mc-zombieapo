@@ -82,6 +82,14 @@ zombies:
       enabled: true
       name: ""
       head: ""
+   PHANTOM:
+      enabled: true
+      attributes:
+         GENERIC_MAX_HEALTH: 30.0
+         GENERIC_MOVEMENT_SPEED: 0.4
+         GENERIC_ATTACK_DAMAGE: 4.0
+         GENERIC_FLYING_SPEED: 1.2
+      name: "Banshee Phantom"
     
 # whether some zombies can spawn as babies, like zombies normally do
 allow-babies: true

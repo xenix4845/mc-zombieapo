@@ -4,15 +4,16 @@ import org.bukkit.entity.Zombie;
 import javax.annotation.Nullable;
 
 public enum ZombieType {
-	DEFAULT,
-	SPRINTER,
-	BOOMER,
-	THROWER,
-	TANK,
-	NINJA,
-	MULTIPLIER,
-	JUMPER,
-	PILLAR;
+    DEFAULT,
+    SPRINTER,
+    BOOMER,
+    THROWER,
+    TANK,
+    NINJA,
+    MULTIPLIER,
+    JUMPER,
+    PILLAR,
+    BANSHEE;  // 마지막 enum 값 뒤에 세미콜론
 	
 	private final static String ZOMBIE_IDENTIFIER = "ApocalypseZombieType";
 
@@ -21,6 +22,7 @@ public enum ZombieType {
 	 *
 	 * @return the type of a zombie, or null
 	 */
+
 	public static @Nullable ZombieType getType(Zombie zombie){
 		for (String tag: zombie.getScoreboardTags()){
 			if (tag.startsWith(ZOMBIE_IDENTIFIER)){

@@ -17,6 +17,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.attribute.AttributeInstance;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -63,20 +65,33 @@ public class ZombieWrapper {
         }
     }
 
-    public Zombie apply(Zombie zombie){
+    public Zombie apply(Zombie zombie) {
         if (head != null)
             zombie.getEquipment().setHelmet(head);
 
-        if (customName != null){
+        if (customName != null) {
             zombie.setCustomName(customName);
             zombie.setCustomNameVisible(true);
         }
 
-        for (Map.Entry<Attribute, Double> attribute: attributes.entrySet()){
-            zombie.getAttribute(attribute.getKey()).setBaseValue(attribute.getValue());
-
-            if (attribute.getKey() == Attribute.GENERIC_MAX_HEALTH){
-                zombie.setHealth(attribute.getValue());
+        // 새로운 속성 설정 방식
+        for (Map.Entry<Attribute, Double> attribute: attributes.entrySet()) {
+            var instance = zombie.getAttribute(attribute.getKey());
+            if (instance != null) {
+                // 기존 모든 수정자 제거
+                for (AttributeModifier modifier : instance.getModifiers()) {
+                    instance.removeModifier(modifier);
+                }
+                
+                // 새 수정자 추가 - 값을 2048 이하로 제한
+                double value = Math.min(attribute.getValue(), 2048.0);
+                AttributeModifier modifier = new AttributeModifier(
+                    UUID.randomUUID(),
+                    "ZombieApocalypse",
+                    value - instance.getBaseValue(),
+                    AttributeModifier.Operation.ADD_NUMBER
+                );
+                instance.addModifier(modifier);
             }
         }
         return zombie;
